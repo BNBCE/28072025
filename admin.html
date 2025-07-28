@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel - CRUD</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h2>🛠️ অ্যাডমিন প্যানেল (CRUD)</h2>
+  <input type="text" id="studentId" placeholder="Student ID">
+  <input type="text" id="studentName" placeholder="Name">
+  <input type="text" id="studentCourse" placeholder="Course">
+  <input type="password" id="studentPass" placeholder="Password">
+  <button onclick="addOrUpdateStudent()">➕ যুক্ত / ✏️ আপডেট</button>
+  <button onclick="deleteStudent()">🗑️ মুছুন</button>
+  <div id="status"></div>
+</div>
+
+<div class="container">
+  <h3>📋 সকল Student তথ্য</h3>
+  <div id="studentList"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="firebase.js"></script>
+<script>
+  const db = firebase.database();
+
+  function addOrUpdateStudent() {
+    const id = document.getElementById("studentId").value.trim();
+    const name = document.getElementById("studentName").value.trim();
+    const course = document.getElementById("studentCourse").value.trim();
+    const pass = document.getElementById("studentPass").value;
+
+    if (!id || !name || !course || !pass) {
+      alert("সব তথ্য দিন!");
+      return;
+    }
+
+    db.ref("students/" + id).set({
+      name: name,
+      course: course,
+      password: pass
+    }).then(() => {
+      document.getElementById("status").innerText = "✅ সংরক্ষণ / আপডেট সফল!";
+      loadStudents();
+    });
+  }
+
+  function deleteStudent() {
+    const id = document.getElementById("studentId").value.trim();
+    if (!id) {
+      alert("Student ID দিন");
+      return;
+    }
+
+    db.ref("students/" + id).remove().then(() => {
+      document.getElementById("status").innerText = "🗑️ মুছে ফেলা হয়েছে!";
+      loadStudents();
+    });
+  }
+
+  function loadStudents() {
+    db.ref("students").once("value").then(snapshot => {
+      const data = snapshot.val();
+      const listDiv = document.getElementById("studentList");
+      listDiv.innerHTML = "";
+      for (let id in data) {
+        const s = data[id];
+        listDiv.innerHTML += `<p><strong>${id}</strong> - ${s.name} (${s.course})</p>`;
+      }
+    });
+  }
+
+  window.onload = loadStudents;
+</script>
+</body>
+</html>

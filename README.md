@@ -1,1 +1,1 @@
-# 28072025
+# Firebase Student Login with Full CRUD Admin Panel
